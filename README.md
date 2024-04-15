@@ -24,6 +24,7 @@ Use the fitness function with your own optimization algorithm.
 
 The repository aims to facilitate research in the field of numerical optimization by providing a flexible and user-friendly platform for generating and testing optimization problems.
 For detailed instructions and more information about the capabilities of GNBG, refer to the documentation provided within the code.
+This code includes a sample optimizer—the Differential Evolution algorithm (DE) from SciPy.
 
 ***Related Source Codes:***
 
