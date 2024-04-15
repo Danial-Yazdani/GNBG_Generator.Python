@@ -26,6 +26,7 @@ Copyright notice: (c) 2023 Danial Yazdani
 
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.optimize import differential_evolution
 
 # Define the GNBG class including the generator function
 class GNBG:
@@ -256,6 +257,8 @@ class GNBG:
         return R
 
     def fitness(self, X):
+        if len(X.shape)<2:
+            X = X.reshape(1,-1)        
         SolutionNumber = X.shape[0]
         result = np.nan * np.ones(SolutionNumber)
         for jj in range(SolutionNumber):
@@ -292,25 +295,36 @@ class GNBG:
         Y[tmp] = -np.exp(Y[tmp] + Alpha[1] * (np.sin(Beta[2] * Y[tmp]) + np.sin(Beta[3] * Y[tmp])))
         return Y
 
-
-
-
-
 gnbg = GNBG()
 
+
+
+# The following code is an example of how a GNBG's problem instance can be solved using an optimizer
+# The Differential Evolution (DE) optimizer is used here as an example. You can replace it with any other optimizer of your choice.
 
 # Set a random seed for the optimizer
 np.random.seed()  # This uses a system-based source to seed the random number generator
 
+# Define the bounds for the optimizer based on the bounds of the problem instance    
+lb = -100*np.ones(gnbg.Dimension)
+ub = 100*np.ones(gnbg.Dimension)
+bounds = []
+for i in range(0,gnbg.Dimension):
+    bounds.append(tuple((lb[i],ub[i])))
 
-#Your optimization algorithm goes here
-Number_of_Solutions = 10000
-X = np.random.rand(Number_of_Solutions, gnbg.Dimension) # This is for generating a random population of a number of solutions for testing GNBG
-# Calculating the fitness=objective values of the population using the GNBG function. The result is a Number_of_Solutions*1 vector of objective values
-result = gnbg.fitness(X) 
+# Run the optimizer where the fitness function is gnbg.fitness    
+popsize = 15  # population size for DE
+maxiter = gnbg.MaxEvals // popsize # number of generations/iterations for DE
 
-# After running the algorithm, the best fitness value is stored in gnbg.BestFoundResult
-# The function evaluation number where the algorithm reached the acceptance threshold is stored in gnbg.AcceptanceReachPoint
+results = differential_evolution(gnbg.fitness, bounds=bounds, disp=True, polish=False, popsize=popsize, maxiter=maxiter)
+
+
+# If you use your own algorithm (not from a library), you can use result = gnbg.fitness(X) to calculate the fitness values of multiple solutions stored in a matrix X.
+# The function returns the fitness values of the solutions in the same order as they are stored in the matrix X.
+
+# After running the algorithm, the best fitness value is stored in gnbg.BestFoundResult.
+# The best found position is stored in gnbg.BestFoundPosition.
+# The function evaluation number where the algorithm reached the acceptance threshold is stored in gnbg.AcceptanceReachPoint. If the algorithm did not reach the acceptance threshold, it is set to infinity.
 # For visualizing the convergence behavior, the history of the objective values is stored in gnbg.FEhistory, however it needs to be processed as follows:
 
 convergence = []
@@ -326,5 +340,5 @@ plt.plot(range(1, len(convergence) + 1), convergence)
 plt.xlabel('Function Evaluation Number (FE)')
 plt.ylabel('Error')
 plt.title('Convergence Plot')
-#plt.yscale('log')  # Set y-axis to logarithmic scale
+plt.yscale('log')  # Set y-axis to logarithmic scale
 plt.show()
